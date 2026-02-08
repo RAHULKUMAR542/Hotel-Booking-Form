@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Summary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <div class="container">
+      <header class="summary-header-bar">
+        <button type="button" class="back-arrow" onclick="window.location.href='index.html'" aria-label="Back to booking">
+          ←
+        </button>
+        <h1>Your Booking Summary</h1>
+      </header>
+
+      <div id="allBookingsContainer"></div>
+
+      <p id="noBookingMessage" style="display: none;">
+        No booking data found. Please make a new booking.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      // XSS Prevention: Escape HTML special characters
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      const allBookingsContainer = document.getElementById("allBookingsContainer");
+      const noBookingMessage = document.getElementById("noBookingMessage");
+
+      const showEmptyState = () => {
+        if (allBookingsContainer) allBookingsContainer.innerHTML = "";
+        noBookingMessage.style.display = "block";
+      };
+
+      // Get all bookings from history
+      const historyRaw = localStorage.getItem("bookingHistory");
+      let allBookings = [];
+
+      if (historyRaw) {
+        try {
+          const history = JSON.parse(historyRaw);
+          if (Array.isArray(history) && history.length > 0) {
+            allBookings = history;
+          }
+        } catch (e) {
+          console.error("Failed to parse booking history", e);
+        }
+      }
+
+      // If no bookings found, show empty state
+      if (allBookings.length === 0) {
+        showEmptyState();
+        return;
+      }
+
+      // Display all bookings as individual cards
+      if (allBookingsContainer) {
+        const bookingsHtml = allBookings
+          .map((b, index) => {
+            // Sanitize user input to prevent XSS
+            const safeFullname = escapeHtml(b.fullname || "");
+            const safeHotel = escapeHtml(b.hotel || "");
+            const safeEmail = escapeHtml(b.email || "");
+            const safeRoom = escapeHtml(b.room || "");
+            const safeCheckin = escapeHtml(b.checkin || "");
+            const safeCheckout = escapeHtml(b.checkout || "");
+            const safeRequests = escapeHtml(b.requests || "");
+
+            return `
+              <section class="summary booking-card">
+                <div class="summary-header">
+                  <p><strong>Booking ${index + 1}</strong> - Confirmed for ${safeFullname} at ${safeHotel}</p>
+                  <button type="button" class="delete-btn-small" onclick="deleteBooking(${index})" title="Delete this booking" aria-label="Delete booking ${index + 1}">×</button>
+                </div>
+                <div>
+                  <ul>
+                    <li><strong>Name:</strong> ${safeFullname}</li>
+                    <li><strong>Email:</strong> ${safeEmail}</li>
+                    <li><strong>Hotel:</strong> ${safeHotel}</li>
+                    <li><strong>Room type:</strong> ${safeRoom}</li>
+                    <li><strong>Guests:</strong> ${b.guests || 0}</li>
+                    <li><strong>Check-in:</strong> ${safeCheckin}</li>
+                    <li><strong>Check-out:</strong> ${safeCheckout}</li>
+                    <li><strong>Nights:</strong> ${b.nights || 0}</li>
+                    <li><strong>Estimated price:</strong> ₹${b.price || 0}</li>
+                    ${
+                      safeRequests
+                        ? `<li><strong>Special requests:</strong> ${safeRequests}</li>`
+                        : ""
+                    }
+                  </ul>
+                </div>
+              </section>
+            `;
+          })
+          .join("");
+
+        allBookingsContainer.innerHTML = bookingsHtml;
+      }
+
+      // Function to delete individual booking from history
+      window.deleteBooking = function(index) {
+        if (!confirm("Are you sure you want to delete this booking?")) {
+          return;
+        }
+
+        const historyRaw = localStorage.getItem("bookingHistory");
+        if (!historyRaw) return;
+        
+        try {
+          const history = JSON.parse(historyRaw);
+          if (Array.isArray(history) && index >= 0 && index < history.length) {
+            history.splice(index, 1);
+            localStorage.setItem("bookingHistory", JSON.stringify(history));
+            
+            // Update lastBooking to match the most recent booking in history
+            if (history.length > 0) {
+              localStorage.setItem("lastBooking", JSON.stringify(history[history.length - 1]));
+            } else {
+              localStorage.removeItem("lastBooking");
+            }
+            
+            // Reload the page to refresh the display
+            location.reload();
+          }
+        } catch (e) {
+          console.error("Failed to delete booking", e);
+          alert("Failed to delete booking. Please try again.");
+        }
+      };
+
+    })();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hotel Booking Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simple hotel booking form with validation and price estimate.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <div class="container">
+      <h1>Hotel Booking Form</h1>
+
+      <form id="bookingForm" novalidate>
+        <div class="field">
+          <label for="fullname">Full Name</label>
+          <input type="text" id="fullname" name="fullname" required placeholder="Enter your full name">
+          <small class="field-error" data-error-for="fullname"></small>
+        </div>
+
+        <div class="field">
+          <label for="email">Email ID</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email">
+          <small class="field-error" data-error-for="email"></small>
+        </div>
+
+        <div class="field">
+          <label for="hotel">Hotel Name</label>
+          <input type="text" id="hotel" name="hotel" required placeholder="Enter hotel name">
+          <small class="field-error" data-error-for="hotel"></small>
+        </div>
+
+        <div class="field">
+          <label for="checkin">Check-in Date</label>
+          <input type="date" id="checkin" name="checkin" required>
+          <small class="field-error" data-error-for="checkin"></small>
+        </div>
+
+        <div class="field">
+          <label for="checkout">Check-out Date</label>
+          <input type="date" id="checkout" name="checkout" required>
+          <small class="field-error" data-error-for="checkout"></small>
+        </div>
+
+        <div class="field">
+          <label for="room">Room Type</label>
+          <select id="room" name="room" required>
+            <option value="">Select Room</option>
+            <option value="Single">Single (₹2000/night)</option>
+            <option value="Double">Double (₹3500/night)</option>
+            <option value="Suite">Suite (₹6000/night)</option>
+          </select>
+          <small class="field-error" data-error-for="room"></small>
+        </div>
+
+        <div class="field">
+          <label for="guests">Number of Guests</label>
+          <input type="number" id="guests" name="guests" min="1" max="10" required>
+          <small class="field-error" data-error-for="guests"></small>
+        </div>
+
+        <div class="field">
+          <label for="requests">Special Requests (optional)</label>
+          <textarea
+            id="requests"
+            name="requests"
+            maxlength="300"
+            rows="3"
+            placeholder="Any special request (optional)"
+          ></textarea>
+          <small class="char-count" id="requestsCounter">0 / 300</small>
+        </div>
+
+        <div class="field inline">
+          <div>
+            <strong>Nights:</strong> <span id="nightsCount">0</span>
+          </div>
+          <div>
+            <strong>Estimated Price:</strong> ₹<span id="priceEstimate">0</span>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          <span id="spinner" class="spinner" aria-hidden="true"></span>
+          <span id="submitText">Book Now</span>
+        </button>
+
+        <p id="feedback" aria-live="polite"></p>
+      </form>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
